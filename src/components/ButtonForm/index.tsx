@@ -1,8 +1,12 @@
 import { Button, TextButton } from "./styles";
 
-export function ButtonForm(){
-  return(
-    <Button>
+type Props = {
+  onRegistry: () => void
+}
+
+export function ButtonForm({ onRegistry }: Props) {
+  return (
+    <Button onPress={onRegistry}>
       <TextButton>Salvar Despesa</TextButton>
     </Button>
   )

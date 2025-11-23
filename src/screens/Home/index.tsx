@@ -1,13 +1,30 @@
+import { BackButton } from "@components/BackButton";
 import { Form } from "@components/Form";
-import { Header } from "@components/Header";
-import { Container } from "./styles";
+import { useNavigation } from "@react-navigation/native";
+import { Container, ContentBackButton, ContentForm } from "./styles";
 
-export function Home(){
-  return(
+export function Home() {
+
+  const navigation = useNavigation();
+
+  function handleNavigateToListPage() {
+    navigation.navigate('listPage')
+  }
+
+  return (
     <Container>
-      {/* <Header/> */}
-      <Form />
-        
+
+      <ContentBackButton>
+        <BackButton
+          onPress={handleNavigateToListPage}
+          icon="PRIMARY"
+        />
+      </ContentBackButton>
+
+      <ContentForm>
+        <Form />
+      </ContentForm>
+
     </Container>
   )
 }

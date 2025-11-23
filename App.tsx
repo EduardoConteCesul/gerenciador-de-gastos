@@ -1,11 +1,11 @@
-import { Home } from '@screens/Home';
+import { Routes } from '@routes/index';
 import theme from '@theme/index';
 import { ThemeProvider } from 'styled-components/native';
 
 export default function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Home />
+      <Routes />
     </ThemeProvider>
   );
 }
