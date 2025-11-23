@@ -13,8 +13,9 @@ export const Container = styled.View`
 `;
 
 export const TitleForm = styled.Text`
-  padding: 0px 0px 20px 0px;
-  font-size: 28px;
+  margin-bottom: 20px;
+  font-size: 30px;
   font-weight: bold;
+  color: #ffffffff;
 `;
 
