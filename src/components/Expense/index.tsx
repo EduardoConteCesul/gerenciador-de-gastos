@@ -1,10 +1,9 @@
 import { ButtonDelete, ButtonIcon, Container, ContentCenter, ContentPayment, Description, TextDate, TextValue, TypePayment } from "./styles";
 
-export type ExpenseProps = {
+type ExpenseProps = {
   description: string;
-  value: string;
+  valueProduct: string;
   date: string;
-  category: string;
   typePayment: string;
 }
 
@@ -23,7 +22,7 @@ export function Expense({ data, onClickDel }: Props) {
 
         <ContentPayment>
           <TypePayment>{data.typePayment}</TypePayment>
-          <TextValue>R$ {data.value}</TextValue>
+          <TextValue>R$ {data.valueProduct}</TextValue>
         </ContentPayment>
 
       </ContentCenter>

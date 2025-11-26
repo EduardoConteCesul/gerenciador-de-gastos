@@ -1,85 +1,105 @@
 import { ButtonForm } from "@components/ButtonForm";
 import { InputTextForm } from "@components/InputTextForm";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { Container, TitleForm } from "./styles";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type ExpenseProps = {
-  description: string;
-  value: string;
-  date: string;
-  typePayment: string;
-}
+const expenseSchema = z.object({
+  description: z.string().min(3, "A descrição deve ter no mínimo 3 caracteres."),
+  valueProduct: z.string().regex(/^[0-9]+([,\.][0-9]{2})?$/, "Formato de valor inválido."),
+  date: z.string().length(5, "A data deve estar no formato DD/MM"),
+  typePayment: z.string().min(1, "Selecione uma forma de pagamento."),
+});
+
+type FormData = z.infer<typeof expenseSchema>;
 
 export function Form() {
 
-  const [description, setDescription] = useState<string>("");
-  const [value, setValue] = useState<string>("");
-  const [date, setDate] = useState<string>("");
-  const [typePayment, setTypePayment] = useState<string>("");
+  const {
+    control,
+    handleSubmit,
+    reset,
+  } = useForm<FormData>({
+    resolver: zodResolver(expenseSchema),
+    defaultValues: {
+      description: "",
+      valueProduct: "",
+      date: "",
+      typePayment: "",
+    }
+  });
 
-  const storeData = async (newExpense: ExpenseProps) => {
+  const storeData = async (newExpense: FormData) => {
     try {
       const listaAtual = await AsyncStorage.getItem('expenses');
-
       const dadosAtuais = listaAtual ? JSON.parse(listaAtual) : [];
-
-      const novosDados: ExpenseProps[] = [...dadosAtuais, newExpense];
-
+      const novosDados: FormData[] = [...dadosAtuais, newExpense];
       await AsyncStorage.setItem('expenses', JSON.stringify(novosDados));
-      clearForm();
+      reset();
     } catch (e) {
       console.error('Erro ao salvar:', e);
     }
   }
 
-  function handleExpense() {
-    if (!description || !value || !date || !typePayment) {
-      return;
-    }
-
-    const newExpense: ExpenseProps = {
-      description,
-      value,
-      date,
-      typePayment
-    }
-
-    storeData(newExpense);
-  }
-
-  function clearForm() {
-    setDescription("");
-    setValue("");
-    setDate("");
-    setTypePayment("");
+  const onSubmit = (data: FormData) => {
+    storeData(data);
   }
 
   return (
-    <Container>
+    <Container >
       <TitleForm>Cadastre sua Despesa</TitleForm>
 
-      <InputTextForm
-        placeholder="Descrição do Produto"
-        onChangeText={setDescription}
-        value={description}
+      <Controller
+        control={control}
+        name="description"
+        render={({ field: { onChange, value } }) => (
+          <InputTextForm
+            placeholder="Descrição do Produto"
+            onChangeText={onChange}
+            value={value}
+          />
+        )}
       />
-      <InputTextForm
-        placeholder="Valor"
-        onChangeText={setValue}
-        value={value}
+
+      <Controller
+        control={control}
+        name="valueProduct"
+        render={({ field: { onChange, value } }) => (
+          <InputTextForm
+            placeholder="Valor"
+            onChangeText={onChange}
+            value={value}
+          />
+        )}
       />
-      <InputTextForm
-        placeholder="Data"
-        onChangeText={setDate}
-        value={date}
+
+      <Controller
+        control={control}
+        name="date"
+        render={({ field: { onChange, value } }) => (
+          <InputTextForm
+            placeholder="Data"
+            onChangeText={onChange}
+            value={value}
+          />
+        )}
       />
-      <InputTextForm
-        placeholder="Forma de Pagamento"
-        onChangeText={setTypePayment}
-        value={typePayment}
+
+      <Controller
+        control={control}
+        name="typePayment"
+        render={({ field: { onChange, value } }) => (
+          <InputTextForm
+            placeholder="Forma de Pagamento"
+            onChangeText={onChange}
+            value={value}
+          />
+        )}
       />
-      <ButtonForm onRegistry={handleExpense} />
+
+      <ButtonForm onRegistry={handleSubmit(onSubmit)} />
     </Container>
   )
 }

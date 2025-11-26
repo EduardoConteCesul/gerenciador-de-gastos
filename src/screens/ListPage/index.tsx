@@ -1,12 +1,19 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
-import { FlatList } from "react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useCallback, useState } from "react";
 
 import { BackButton } from "@components/BackButton";
-import { Expense, ExpenseProps } from "@components/Expense";
+import { Expense } from "@components/Expense";
 import { ContentCenter, Description } from "@components/Expense/styles";
 import { Container, ContentBackButton, ContentFlatList, TitleList, TotalGastos } from "./styles";
+import { FlatList } from "react-native";
+
+type ExpenseProps = {
+  description: string;
+  valueProduct: string;
+  date: string;
+  typePayment: string;
+}
 
 export function ListPage() {
   const navigation = useNavigation();
@@ -27,13 +34,13 @@ export function ListPage() {
       calculateTotal(expenses);
 
     } catch (error) {
-      console.log(error);
+      console.error("Erro ao carregar dados:", error);
     }
   }
 
   function calculateTotal(expenses: ExpenseProps[]) {
     const totalSum = expenses.reduce((acumulador, item) => {
-      const onlyNumbers = item.value.replace(/[^0-9,]/g, '');
+      const onlyNumbers = item.valueProduct.replace(/[^0-9,]/g, '');
       const cleanValue = onlyNumbers.replace(',', '.');
       const numberValue = parseFloat(cleanValue);
       const validValue = isNaN(numberValue) ? 0 : numberValue;
@@ -47,7 +54,7 @@ export function ListPage() {
 
   async function handleRemove(itemToDelete: ExpenseProps) {
     try {
-      const newExpenses = data.filter(item => item !== itemToDelete);
+      const newExpenses = data.filter(item => item.description !== itemToDelete.description || item.valueProduct !== itemToDelete.valueProduct);
 
       setData(newExpenses);
       calculateTotal(newExpenses);
@@ -55,13 +62,15 @@ export function ListPage() {
       await AsyncStorage.setItem('expenses', JSON.stringify(newExpenses));
 
     } catch (error) {
-      console.log("Erro ao remover item:", error);
+      console.error("Erro ao remover item:", error);
     }
   }
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   return (
     <Container>
@@ -77,9 +86,9 @@ export function ListPage() {
           data={data}
           keyExtractor={(item, index) => item.description + index}
           renderItem={({ item }) => (
-            <Expense 
-              data={item} 
-              onClickDel={() => handleRemove(item)} 
+            <Expense
+              data={item}
+              onClickDel={() => handleRemove(item)}
             />
           )}
           contentContainerStyle={{ paddingBottom: 20, gap: 10 }}
